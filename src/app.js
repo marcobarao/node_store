@@ -1,10 +1,13 @@
 const express = require("express");
 
+const indexRoute = require("./routes/index.route");
+const productRoute = require("./routes/product.route");
+
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-app.get("/", (req, res) => {
-  res.json({ title: "Node Store API", version: "0.0.1" });
-});
+app.use("/", indexRoute);
+app.use("/products", productRoute);
 
 module.exports = app;
