@@ -1,6 +1,3 @@
-const mongoose = require("mongoose");
-
-const Product = mongoose.model("Product");
 const Validator = require("../validators/fluent-validator");
 const Repository = require("../repositories/product.repository");
 
