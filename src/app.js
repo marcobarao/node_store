@@ -2,8 +2,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const requireDir = require("require-dir");
 
+const config = require("./config");
+
 mongoose.connect(
-  "mongodb://barao:barao1@ds035787.mlab.com:35787/node_store",
+  config.connectionString,
   { useNewUrlParser: true }
 );
 requireDir("./models");

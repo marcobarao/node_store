@@ -1,5 +1,9 @@
+const azure = require("azure-storage");
+const guid = require("guid");
+
 const Validator = require("../validators/fluent-validator");
 const Repository = require("../repositories/product.repository");
+const config = require("../config");
 
 function validBody(body, res) {
   let validator = new Validator();
@@ -69,9 +73,39 @@ module.exports = {
   async store(req, res) {
     validBody(req.body, res);
     try {
-      const product = await Repository.store(req.body);
+      const blobSvc = azure.createBlobService(config.containerConnectionString);
+
+      let filename = guid.raw().toString() + ".jpg";
+      let rawdata = req.body.image;
+      let matches = rawdata.match(/data:([A-Za-z-+\/]+);base64,(.+)/);
+      let type = matches[1];
+      let buffer = new Buffer(matches[2], "base64");
+
+      await blobSvc.createBlockBlobFromText(
+        "product-images",
+        filename,
+        buffer,
+        { contentType: type },
+        (error, result, response) => {
+          if (error) {
+            filename = "default-product.png";
+          }
+        }
+      );
+
+      const product = await Repository.store({
+        title: req.body.title,
+        description: req.body.description,
+        slug: req.body.slug,
+        price: req.body.price,
+        tags: req.body.tags,
+        active: true,
+        image: `https://nodestorebr.blob.core.windows.net/product-images/${filename}`
+      });
       return res.status(201).json(product);
     } catch (e) {
+      console.log(e);
+
       return res.status(400).json(e);
     }
   },

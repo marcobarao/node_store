@@ -7,11 +7,14 @@
     "start": "nodemon ./bin/server.js"
   },
   "dependencies": {
+    "azure-storage": "^2.10.2",
     "debug": "^4.1.0",
     "express": "^4.16.4",
     "guid": "^0.0.12",
+    "md5": "^2.2.1",
     "mongoose": "^5.3.6",
-    "require-dir": "^1.1.0"
+    "require-dir": "^1.1.0",
+    "sendgrid": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.4"
