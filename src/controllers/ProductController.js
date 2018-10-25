@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const Product = mongoose.model("Product");
 const Validator = require("../validators/fluent-validator");
+const Repository = require("../repositories/product.repository");
 
 function validBody(body, res) {
   let validator = new Validator();
@@ -38,43 +39,31 @@ function validBody(body, res) {
 module.exports = {
   async index(req, res) {
     try {
-      const products = await Product.find({ active: true }, "title price slug");
+      const products = await Repository.index();
       return res.status(200).json(products);
     } catch (e) {
       return res.status(404).json(e);
     }
   },
   async show(req, res) {
-    const slug = req.params.slug;
     try {
-      const product = await Product.findOne(
-        { slug, active: true },
-        "title description price tags slug"
-      );
+      const product = await Repository.show(req.params.slug);
       return res.status(200).json(product);
     } catch (e) {
       return res.status(404).json(e);
     }
   },
   async showById(req, res) {
-    const id = req.params.id;
     try {
-      const product = await Product.findById(id);
+      const product = await Repository.showById(req.params.id);
       return res.status(200).json(product);
     } catch (e) {
       return res.status(404).json(e);
     }
   },
   async showByTags(req, res) {
-    const tags = req.params.tags.split(",");
     try {
-      const products = await Product.find(
-        {
-          tags: { $all: tags },
-          active: true
-        },
-        "title price slug"
-      );
+      const products = await Repository.showByTags(req.params.tags.split(","));
       return res.status(200).json(products);
     } catch (e) {
       return res.status(404).json(e);
@@ -83,27 +72,23 @@ module.exports = {
   async store(req, res) {
     validBody(req.body, res);
     try {
-      const product = await Product.create(req.body);
+      const product = await Repository.store(req.body);
       return res.status(201).json(product);
     } catch (e) {
       return res.status(400).json(e);
     }
   },
   async update(req, res) {
-    const id = req.params.id;
     try {
-      const product = await Product.findByIdAndUpdate(id, req.body, {
-        new: true
-      });
+      const product = await Repository.update(req.params.id, req.body);
       return res.status(200).json(product);
     } catch (e) {
       return res.status(400).json(e);
     }
   },
   async destroy(req, res) {
-    const id = req.params.id;
     try {
-      await Product.findByIdAndRemove(id);
+      await Repository.destroy(req.params.id);
       return res.status(204).send();
     } catch (e) {
       return res.status(400).json(e);
