@@ -3,6 +3,7 @@ const md5 = require("md5");
 const Validator = require("../validators/fluent-validator");
 const Repository = require("../repositories/customer.repository");
 const emailService = require("../services/email.service");
+const authService = require("../services/auth.service");
 
 function validBody(body, res) {
   let validator = new Validator();
@@ -43,6 +44,33 @@ module.exports = {
       );
 
       return res.status(201).json(customer);
+    } catch (e) {
+      return res.status(400).json(e);
+    }
+  },
+  async authenticate(req, res) {
+    try {
+      const customer = await Repository.authenticate({
+        email: req.body.email,
+        password: md5(req.body.password + global.SALT_KEY)
+      });
+
+      if (!customer) {
+        return res.status(404).json({ message: "Usuário ou senha inválidos" });
+      }
+
+      const token = await authService.generateToken({
+        email: customer.email,
+        name: customer.name
+      });
+
+      return res.status(201).json({
+        token,
+        data: {
+          email: customer.email,
+          name: customer.name
+        }
+      });
     } catch (e) {
       return res.status(400).json(e);
     }

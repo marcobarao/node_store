@@ -11,6 +11,7 @@
     "debug": "^4.1.0",
     "express": "^4.16.4",
     "guid": "^0.0.12",
+    "jsonwebtoken": "^8.3.0",
     "md5": "^2.2.1",
     "mongoose": "^5.3.6",
     "require-dir": "^1.1.0",
