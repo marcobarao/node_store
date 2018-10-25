@@ -34,7 +34,8 @@ module.exports = {
       const customer = await Repository.store({
         name: req.body.name,
         email: req.body.email,
-        password: md5(req.body.password + global.SALT_KEY)
+        password: md5(req.body.password + global.SALT_KEY),
+        roles: ["user"]
       });
 
       emailService.send(
@@ -60,15 +61,50 @@ module.exports = {
       }
 
       const token = await authService.generateToken({
+        id: customer._id,
         email: customer.email,
-        name: customer.name
+        name: customer.name,
+        roles: customer.roles
       });
 
       return res.status(201).json({
         token,
         data: {
           email: customer.email,
-          name: customer.name
+          name: customer.name,
+          roles: customer.roles
+        }
+      });
+    } catch (e) {
+      return res.status(400).json(e);
+    }
+  },
+  async refreshToken(req, res) {
+    try {
+      const token =
+        req.body.token || req.query.token || req.headers["x-access-token"];
+
+      const data = await authService.decodeToken(token);
+
+      const customer = await Repository.getById(data.id);
+
+      if (!customer) {
+        return res.status(401).json({ message: "Cliente não autorizado" });
+      }
+
+      const tokenData = await authService.generateToken({
+        id: customer._id,
+        email: customer.email,
+        name: customer.name,
+        roles: customer.roles
+      });
+
+      return res.status(201).json({
+        tokenData,
+        data: {
+          email: customer.email,
+          name: customer.name,
+          roles: customer.roles
         }
       });
     } catch (e) {

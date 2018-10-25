@@ -1,6 +1,7 @@
 const guid = require("guid");
 
 const Repository = require("../repositories/order.repository");
+const authService = require("../services/auth.service");
 
 module.exports = {
   async index(req, res) {
@@ -12,8 +13,13 @@ module.exports = {
     }
   },
   async store(req, res) {
+    const token =
+      req.body.token || req.query.token || req.headers["x-access-token"];
+
+    const userData = await authService.decodeToken(token);
+
     const data = {
-      customer: req.body.customer,
+      customer: userData.id,
       number: guid.raw().substring(0, 6),
       items: req.body.items
     };

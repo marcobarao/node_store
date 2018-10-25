@@ -8,6 +8,9 @@ module.exports = {
       password: data.password
     });
   },
+  async getById(id) {
+    return await Customer.findById(id);
+  },
   async store(body) {
     return await Customer.create(body);
   }
